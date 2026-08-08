@@ -1,0 +1,64 @@
+@import url('https://fonts.googleapis.com/css2?family=Baloo+2:wght@500;600;700;800&family=Nunito:wght@500;600;700;800;900&family=Space+Mono:wght@400;700&display=swap');
+@import 'tailwindcss';
+
+:root {
+  --ink: #2e203d;
+  --plum: #41254f;
+  --cream: #fff5d9;
+  --butter: #ffd65a;
+  --coral: #ff5b55;
+  --blue: #3b5bdb;
+  --mint: #a8e8c9;
+  --lilac: #c9b5f7;
+  --font-display: 'Baloo 2', cursive;
+  --font-body: 'Nunito', sans-serif;
+  --font-mono: 'Space Mono', monospace;
+}
+
+@theme inline {
+  --font-display: var(--font-display);
+  --font-body: var(--font-body);
+  --font-mono: var(--font-mono);
+}
+
+* { box-sizing: border-box; }
+html, body, #root { width: 100%; min-height: 100%; margin: 0; }
+body {
+  overflow: hidden;
+  background: var(--plum);
+  color: var(--ink);
+  font-family: var(--font-body);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+.video-root {
+  position: relative;
+  width: 100vw;
+  height: 56.25vw;
+  min-height: 100dvh;
+  max-height: 100dvh;
+  overflow: hidden;
+  isolation: isolate;
+  background: var(--cream);
+}
+.video-root::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 20;
+  pointer-events: none;
+  opacity: .08;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 180 180' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='.28'/%3E%3C/svg%3E");
+  mix-blend-mode: multiply;
+}
+.display { font-family: var(--font-display); }
+.mono { font-family: var(--font-mono); }
+.scene-layer { position: absolute; inset: 0; overflow: hidden; }
+.soft-shadow { box-shadow: 0 1.1vw 0 rgba(46,32,61,.13); }
+.paper-card { background: var(--cream); border: .28vw solid var(--ink); border-radius: 2.2vw; }
+.tiny-label { font-size: 1.05vw; letter-spacing: .15em; text-transform: uppercase; font-weight: 900; }
+.dot-grid {
+  background-image: radial-gradient(rgba(46,32,61,.22) .12vw, transparent .12vw);
+  background-size: 1.6vw 1.6vw;
+}

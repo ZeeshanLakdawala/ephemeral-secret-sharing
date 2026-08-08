@@ -1,0 +1,28 @@
+kind = "video"
+previewPath = "/ephemeral-secret-video/"
+title = "Ephemeral Secret Sharing — Promo"
+description = "A playful, high-energy animated promo video for the Ephemeral Secret Sharing app. It shows a host creating a room, sharing a six-digit code, secrets appearing live for participants, and the room self-destructing when it expires or the host disconnects."
+version = "1.0.0"
+id = "artifacts/ephemeral-secret-video"
+router = "path"
+
+[[services]]
+name = "web"
+paths = [ "/ephemeral-secret-video/" ]
+localPort = 20573
+
+[services.development]
+run = "pnpm --filter @workspace/ephemeral-secret-video run dev"
+
+[services.production]
+build = [ "pnpm", "--filter", "@workspace/ephemeral-secret-video", "run", "build" ]
+serve = "static"
+publicDir = "artifacts/ephemeral-secret-video/dist/public"
+
+[[services.production.rewrites]]
+from = "/*"
+to = "/index.html"
+
+[services.env]
+PORT = "20573"
+BASE_PATH = "/ephemeral-secret-video/"

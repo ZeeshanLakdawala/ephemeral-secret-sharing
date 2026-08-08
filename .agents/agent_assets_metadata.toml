@@ -1,0 +1,9 @@
+uploads = []
+generated = []
+
+[[outputs]]
+id = "9FyAvDojZ29DpWMaZTUa4"
+uri = "file://artifacts/ephemeral-secret-video/public/audio/bg_music.mp3"
+type = "audio"
+title = "background music"
+description = "Generated music: Upbeat funk / nu-disco instrumental background music scoring a playful product explainer video. Bright funky bass, popping snappy drums, sunny rhodes chords, 108 BPM, joyful and boun…"
