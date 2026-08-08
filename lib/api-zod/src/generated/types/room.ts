@@ -5,7 +5,11 @@
  * API specification for the ephemeral secret-sharing utility
  * OpenAPI spec version: 0.1.0
  */
+import type { Secret } from './secret';
 
-export interface HealthStatus {
-  status: string;
+export interface Room {
+  code: string;
+  expiresAt: Date;
+  participantCount: number;
+  secrets: Secret[];
 }

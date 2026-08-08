@@ -5,7 +5,9 @@
  * API specification for the ephemeral secret-sharing utility
  * OpenAPI spec version: 0.1.0
  */
+import type { ErrorResponse } from './errorResponse';
 
-export interface HealthStatus {
-  status: string;
-}
+/**
+ * Room was not found or has expired
+ */
+export type NotFoundResponse = ErrorResponse;

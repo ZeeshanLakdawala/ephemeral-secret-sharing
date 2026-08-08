@@ -3,20 +3,21 @@ info:
   # Do not change the title, if the title changes, the import paths will be broken
   title: Api
   version: 0.1.0
-  description: API specification
+  description: API specification for the ephemeral secret-sharing utility
 servers:
   - url: /api
     description: Base API path
 tags:
   - name: health
     description: Health operations
+  - name: rooms
+    description: Ephemeral sharing room operations
 paths:
   /healthz:
     get:
       operationId: healthCheck
       tags: [health]
       summary: Health check
-      description: Returns server health status
       responses:
         "200":
           description: Healthy
@@ -24,13 +25,251 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/HealthStatus"
+  /rooms:
+    post:
+      operationId: createRoom
+      tags: [rooms]
+      summary: Create an ephemeral sharing room
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/RoomInput"
+      responses:
+        "201":
+          description: Room created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/RoomSession"
+  /rooms/{code}:
+    parameters:
+      - $ref: "#/components/parameters/RoomCode"
+    get:
+      operationId: getRoom
+      tags: [rooms]
+      summary: Get the current public state of a room
+      responses:
+        "200":
+          description: Current room state
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Room"
+        "404":
+          $ref: "#/components/responses/NotFound"
+  /rooms/{code}/join:
+    parameters:
+      - $ref: "#/components/parameters/RoomCode"
+    post:
+      operationId: joinRoom
+      tags: [rooms]
+      summary: Join a room using a six-digit code
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ParticipantInput"
+      responses:
+        "200":
+          description: Participant session
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/RoomSession"
+        "404":
+          $ref: "#/components/responses/NotFound"
+  /rooms/{code}/participants/{participantId}:
+    parameters:
+      - $ref: "#/components/parameters/RoomCode"
+      - name: participantId
+        in: path
+        required: true
+        schema:
+          type: string
+    delete:
+      operationId: leaveRoom
+      tags: [rooms]
+      summary: Leave a room session
+      responses:
+        "204":
+          description: Participant removed
+  /rooms/{code}/secrets:
+    parameters:
+      - $ref: "#/components/parameters/RoomCode"
+    post:
+      operationId: createSecret
+      tags: [rooms]
+      summary: Add a secret as the host
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/SecretInput"
+      responses:
+        "201":
+          description: Secret created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Secret"
+  /rooms/{code}/secrets/{secretId}:
+    parameters:
+      - $ref: "#/components/parameters/RoomCode"
+      - name: secretId
+        in: path
+        required: true
+        schema:
+          type: string
+    patch:
+      operationId: updateSecret
+      tags: [rooms]
+      summary: Edit an existing secret as the host
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/SecretUpdate"
+      responses:
+        "200":
+          description: Updated secret
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Secret"
+    delete:
+      operationId: deleteSecret
+      tags: [rooms]
+      summary: Delete an existing secret as the host
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/SecretDeleteRequest"
+      responses:
+        "204":
+          description: Secret deleted
 components:
+  parameters:
+    RoomCode:
+      name: code
+      in: path
+      required: true
+      schema:
+        type: string
+        pattern: "^[0-9]{6}$"
+  responses:
+    NotFound:
+      description: Room was not found or has expired
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/ErrorResponse"
   schemas:
     HealthStatus:
       type: object
+      required: [status]
       properties:
         status:
           type: string
-      required:
-        - status
-
+    RoomInput:
+      type: object
+      properties:
+        lifetimeMinutes:
+          type: number
+          minimum: 1
+          maximum: 120
+          default: 5
+    ParticipantInput:
+      type: object
+      properties:
+        name:
+          type: string
+          minLength: 1
+          maxLength: 40
+    SecretInput:
+      type: object
+      required: [hostToken, label, value]
+      properties:
+        hostToken:
+          type: string
+        label:
+          type: string
+          minLength: 1
+          maxLength: 80
+        value:
+          type: string
+          minLength: 1
+          maxLength: 10000
+    SecretUpdate:
+      type: object
+      required: [hostToken, label, value]
+      properties:
+        hostToken:
+          type: string
+        label:
+          type: string
+          minLength: 1
+          maxLength: 80
+        value:
+          type: string
+          minLength: 1
+          maxLength: 10000
+    SecretDeleteRequest:
+      type: object
+      required: [hostToken]
+      properties:
+        hostToken:
+          type: string
+    Secret:
+      type: object
+      required: [id, label, value, createdAt]
+      properties:
+        id:
+          type: string
+        label:
+          type: string
+        value:
+          type: string
+        createdAt:
+          type: string
+          format: date-time
+    Room:
+      type: object
+      required: [code, expiresAt, participantCount, secrets]
+      properties:
+        code:
+          type: string
+        expiresAt:
+          type: string
+          format: date-time
+        participantCount:
+          type: number
+        secrets:
+          type: array
+          items:
+            $ref: "#/components/schemas/Secret"
+    RoomSession:
+      allOf:
+        - $ref: "#/components/schemas/Room"
+        - type: object
+          required: [role, participantId]
+          properties:
+            role:
+              type: string
+              enum: [host, participant]
+            participantId:
+              type: string
+            hostToken:
+              type: ["string", "null"]
+    ErrorResponse:
+      type: object
+      required: [error]
+      properties:
+        error:
+          type: string

@@ -1,0 +1,1 @@
+- [Orval + Zod codegen constraints](orval-codegen-constraints.md) — spec shapes that silently break the generated-library typecheck in this workspace, and what to write instead.

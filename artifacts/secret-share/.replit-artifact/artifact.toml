@@ -1,0 +1,28 @@
+kind = "web"
+previewPath = "/"
+title = "Secret Share"
+description = "A lightweight, real-time utility for workshop hosts to create a short-lived sharing room, give participants a six-digit code, and safely distribute temporary secrets that disappear automatically."
+version = "1.0.0"
+id = "artifacts/secret-share"
+router = "path"
+
+[[services]]
+name = "web"
+paths = [ "/" ]
+localPort = 21120
+
+[services.development]
+run = "pnpm --filter @workspace/secret-share run dev"
+
+[services.production]
+build = [ "pnpm", "--filter", "@workspace/secret-share", "run", "build" ]
+serve = "static"
+publicDir = "artifacts/secret-share/dist/public"
+
+[[services.production.rewrites]]
+from = "/*"
+to = "/index.html"
+
+[services.env]
+PORT = "21120"
+BASE_PATH = "/"
