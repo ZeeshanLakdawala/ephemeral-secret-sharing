@@ -1,0 +1,271 @@
+# Project Requirements Document (PRD)
+
+## Project
+
+Ephemeral Secret Sharing Utility
+
+---
+
+# Objective
+
+Build a minimal web application that allows a host to temporarily share one or more secrets with a small group of people.
+
+The application is intended for in-person workshops, hackathons, or team sessions where participants need temporary access to shared secrets (API keys, tokens, passwords, connection strings, etc.).
+
+The product should remain intentionally small and focused on solving this single problem well.
+
+---
+
+# Core User Flow
+
+1. Host opens the application.
+2. Host creates a room.
+3. System generates a unique six-digit room code.
+4. Host shares the room code with participants.
+5. Participants enter the room code and join the room.
+6. Host adds one or more secrets.
+7. Every participant currently in the room immediately receives the newly added secret.
+8. New participants joining later receive all active secrets.
+9. The room automatically expires after the configured lifetime (default: 5 minutes).
+10. Once expired, the room, secrets, and participants are permanently removed.
+
+---
+
+# Functional Requirements
+
+## Room Management
+
+- Create a room.
+- Generate a unique six-digit room code.
+- Prevent duplicate active room codes.
+- Display remaining room lifetime.
+- Automatically delete expired rooms.
+- Reject joins to expired or non-existent rooms.
+
+---
+
+## Participant Management
+
+- Join using room code only.
+- No authentication.
+- No user accounts.
+- Display participant count.
+- Allow multiple simultaneous participants.
+
+---
+
+## Secret Sharing
+
+Host can:
+
+- Add new secret.
+- Edit existing secret.
+- Delete secret.
+
+Participants can:
+
+- View all active secrets.
+- Automatically receive newly added secrets.
+- Copy individual secrets.
+
+Secrets should update in real time without requiring manual refresh.
+
+---
+
+## Room Expiration
+
+Each room has a configurable lifetime.
+
+Default:
+
+- 5 minutes
+
+When expired:
+
+- Remove all participants.
+- Remove all secrets.
+- Remove room.
+- Notify connected users.
+- Return users to the join screen.
+
+---
+
+# Non-Functional Requirements
+
+- Minimal interface.
+- Responsive layout.
+- Fast room creation.
+- Fast participant joining.
+- Real-time updates.
+- Clean error handling.
+- Simple architecture.
+- Small codebase.
+- Production-ready.
+
+---
+
+# Out of Scope
+
+Do not implement:
+
+- Authentication
+- User accounts
+- Databases
+- Permanent storage
+- Message history
+- Encryption beyond standard transport security
+- File uploads
+- Secret versioning
+- Analytics
+- Notifications
+- Email
+- Integrations
+- Admin dashboard
+
+---
+
+# Development Process
+
+## Phase 1
+
+Project setup.
+
+Deliverables:
+
+- Repository initialized.
+- Initial project structure.
+- Git initialized.
+- First commit.
+
+Testing:
+
+- Project starts successfully.
+- Development environment verified.
+
+Proceed only after successful validation.
+
+---
+
+## Phase 2
+
+Room creation.
+
+Deliverables:
+
+- Create room.
+- Generate unique room code.
+- Display room code.
+- Room lifecycle initialized.
+
+Testing:
+
+- Multiple rooms can be created.
+- Codes are unique.
+- Invalid room creation handled.
+- Commit changes.
+
+Proceed only after tests pass.
+
+---
+
+## Phase 3
+
+Room joining.
+
+Deliverables:
+
+- Join room using code.
+- Handle invalid codes.
+- Track participants.
+
+Testing:
+
+- Multiple participants join successfully.
+- Invalid room codes rejected.
+- Participant count updates correctly.
+- Commit changes.
+
+Proceed only after tests pass.
+
+---
+
+## Phase 4
+
+Secret sharing.
+
+Deliverables:
+
+- Host adds secrets.
+- Participants receive updates immediately.
+- New participants receive current secrets.
+- Host edits and deletes secrets.
+
+Testing:
+
+- Real-time updates verified.
+- Multiple secrets supported.
+- Edit and delete operations verified.
+- Commit changes.
+
+Proceed only after tests pass.
+
+---
+
+## Phase 5
+
+Room expiration.
+
+Deliverables:
+
+- Countdown timer.
+- Automatic cleanup.
+- User notification.
+- Redirect after expiration.
+
+Testing:
+
+- Expiration occurs at configured time.
+- Cleanup verified.
+- No stale rooms remain.
+- Commit changes.
+
+Proceed only after tests pass.
+
+---
+
+## Phase 6
+
+Quality assurance.
+
+Validate:
+
+- Complete user journey.
+- Error handling.
+- Edge cases.
+- Concurrent participants.
+- Browser refresh.
+- Invalid input.
+- Duplicate joins.
+- Room expiration during active session.
+- Overall application stability.
+
+Fix all identified issues before proceeding.
+
+Commit final changes.
+
+---
+
+# Acceptance Criteria
+
+The project is complete when:
+
+- A host can create a room.
+- A unique six-digit code is generated.
+- Participants can join using the code.
+- Secrets appear for every participant in real time.
+- New participants receive active secrets.
+- The room expires automatically.
+- All temporary data is removed after expiration.
+- Invalid rooms cannot be joined.
+- The full workflow is stable and tested.
+- Git history reflects incremental development with successful validation at each phase.
