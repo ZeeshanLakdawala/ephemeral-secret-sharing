@@ -5,7 +5,9 @@ import { getGetRoomQueryKey, type Room } from "@workspace/api-client-react";
 export function useRoomStream(code: string | undefined, participantId: string | undefined) {
   const queryClient = useQueryClient();
   const [isConnecting, setIsConnecting] = useState(true);
-  const [isExpired, setIsExpired] = useState(false);
+  const [expirationReason, setExpirationReason] = useState<
+    "host-ended" | "timer" | null
+  >(null);
 
   useEffect(() => {
     if (!code || !participantId) return;
@@ -27,8 +29,15 @@ export function useRoomStream(code: string | undefined, participantId: string | 
       }
     });
 
-    es.addEventListener("expired", () => {
-      setIsExpired(true);
+    es.addEventListener("expired", (event) => {
+      try {
+        const payload = JSON.parse(event.data) as {
+          reason?: "host-ended" | "timer";
+        };
+        setExpirationReason(payload.reason === "host-ended" ? "host-ended" : "timer");
+      } catch {
+        setExpirationReason("timer");
+      }
       es.close();
     });
 
@@ -41,5 +50,9 @@ export function useRoomStream(code: string | undefined, participantId: string | 
     };
   }, [code, participantId, queryClient]);
 
-  return { isConnecting, isExpired };
+  return {
+    isConnecting,
+    isExpired: expirationReason !== null,
+    expirationReason,
+  };
 }

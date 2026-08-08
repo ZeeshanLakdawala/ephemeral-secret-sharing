@@ -53,7 +53,10 @@ export default function RoomPage() {
     { query: { enabled: !!code && !!session, queryKey: getGetRoomQueryKey(code || "") } }
   );
 
-  const { isConnecting, isExpired } = useRoomStream(code, session?.participantId);
+  const { isConnecting, isExpired, expirationReason } = useRoomStream(
+    code,
+    session?.participantId,
+  );
   
   const leaveRoom = useLeaveRoom();
   const createSecret = useCreateSecret();
@@ -75,22 +78,42 @@ export default function RoomPage() {
 
   useEffect(() => {
     if (isExpired || isRoomError || hasCountedDown) {
+      const wasEndedByHost = expirationReason === "host-ended";
       clearRoomSession(code!);
       toast({
-        title: "Room Expired",
-        description: "The room and all its secrets have been securely destroyed.",
+        title: wasEndedByHost ? "Host ended the session" : "Room Expired",
+        description: wasEndedByHost
+          ? "The host disconnected, so the room and all of its secrets were destroyed."
+          : "The room and all its secrets have been securely destroyed.",
         variant: "destructive",
       });
-      setLocation(`/?expired=${code}`);
+      setLocation(
+        `/?expired=${code}${wasEndedByHost ? "&ended=host" : ""}`,
+      );
     }
-  }, [isExpired, isRoomError, hasCountedDown, code, setLocation, toast]);
+  }, [
+    isExpired,
+    isRoomError,
+    hasCountedDown,
+    expirationReason,
+    code,
+    setLocation,
+    toast,
+  ]);
 
   const handleLeave = () => {
     if (session) {
       leaveRoom.mutate({ code: session.code, participantId: session.participantId });
       clearRoomSession(session.code);
     }
-    setLocation("/");
+    // When the host intentionally leaves, the API immediately destroys the
+    // room. Carry that outcome into the landing screen so the host receives
+    // the same clear confirmation as every connected participant.
+    setLocation(
+      session?.role === "host"
+        ? `/?expired=${session.code}&ended=host`
+        : "/",
+    );
   };
 
   const openAddDialog = () => {

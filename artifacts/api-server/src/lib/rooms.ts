@@ -30,11 +30,16 @@ interface Participant {
   lastSeenAt: number;
 }
 
+type ExpiryReason = "host-ended" | "timer";
 type Listener = (event: RoomEvent) => void;
 
 export type RoomEvent =
   | { type: "state"; room: PublicRoom }
-  | { type: "expired"; code: string };
+  | {
+      type: "expired";
+      code: string;
+      reason: ExpiryReason;
+    };
 
 interface Room {
   code: string;
@@ -119,7 +124,16 @@ function broadcastState(room: Room): void {
  * Permanently destroys a room and everything inside it, notifying anyone still
  * connected so their client can return to the join screen.
  */
-function expireRoom(room: Room): void {
+function expireRoom(
+  room: Room,
+  reason: ExpiryReason = "timer",
+): void {
+  // This function may be reached by both the expiry timer and the stream
+  // cleanup for a host. Once removed, the room has already been destroyed.
+  if (!rooms.has(room.code)) {
+    return;
+  }
+
   clearTimeout(room.expiryTimer);
   rooms.delete(room.code);
 
@@ -129,10 +143,10 @@ function expireRoom(room: Room): void {
   room.participants.clear();
 
   for (const listener of listeners) {
-    listener({ type: "expired", code: room.code });
+    listener({ type: "expired", code: room.code, reason });
   }
 
-  logger.info({ code: room.code }, "Room expired and was destroyed");
+  logger.info({ code: room.code, reason }, "Room expired and was destroyed");
 }
 
 function getLiveRoom(code: string): Room {
@@ -237,6 +251,10 @@ export function leaveRoom(code: string, participantId: string): void {
   if (!room) {
     return;
   }
+  if (participantId === room.hostParticipantId) {
+    expireRoom(room, "host-ended");
+    return;
+  }
   if (room.participants.delete(participantId)) {
     broadcastState(room);
   }
@@ -305,7 +323,8 @@ export function deleteSecret(
 
 /**
  * Registers an event stream. Holding a stream open is what marks a participant
- * as present, so the participant count follows real connections.
+ * as present. The host's stream has stronger semantics: as soon as it closes,
+ * the room ends and every participant is notified.
  */
 export function subscribe(
   code: string,
@@ -343,6 +362,15 @@ export function subscribe(
     if (participant) {
       participant.connections = Math.max(0, participant.connections - 1);
       participant.lastSeenAt = Date.now();
+    }
+
+    if (
+      participantId === room.hostParticipantId &&
+      participant?.connections === 0 &&
+      rooms.has(room.code)
+    ) {
+      expireRoom(room, "host-ended");
+      return;
     }
 
     if (rooms.has(room.code)) {

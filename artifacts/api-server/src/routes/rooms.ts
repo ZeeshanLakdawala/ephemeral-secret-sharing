@@ -225,7 +225,12 @@ router.get("/rooms/:code/events", (req, res): void => {
       res.write(`event: state\ndata: ${JSON.stringify(event.room)}\n\n`);
       return;
     }
-    res.write(`event: expired\ndata: ${JSON.stringify({ code: event.code })}\n\n`);
+    res.write(
+      `event: expired\ndata: ${JSON.stringify({
+        code: event.code,
+        reason: event.reason,
+      })}\n\n`,
+    );
     res.end();
   };
 

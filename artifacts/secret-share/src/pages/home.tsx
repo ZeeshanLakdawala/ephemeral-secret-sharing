@@ -29,6 +29,7 @@ export default function Home() {
   const [_, setLocation] = useLocation();
   const { toast } = useToast();
   const [expiredCode, setExpiredCode] = useState<string | null>(null);
+  const [wasEndedByHost, setWasEndedByHost] = useState(false);
 
   const createRoom = useCreateRoom();
   const joinRoom = useJoinRoom();
@@ -53,6 +54,7 @@ export default function Home() {
     const expiredParam = params.get("expired");
     if (expiredParam) {
       setExpiredCode(expiredParam);
+      setWasEndedByHost(params.get("ended") === "host");
     }
   }, [joinForm]);
 
@@ -76,8 +78,11 @@ export default function Home() {
   }
 
   function onJoinSubmit(values: z.infer<typeof joinFormSchema>) {
+    const name = values.name?.trim();
     joinRoom.mutate(
-      { code: values.code, data: { name: values.name } },
+      // The API accepts an omitted name. Do not send "" because an empty
+      // string is a provided name and should still fail its minimum length.
+      { code: values.code, data: name ? { name } : {} },
       {
         onSuccess: (session) => {
           saveRoomSession(session.code, session);
@@ -113,10 +118,15 @@ export default function Home() {
         {expiredCode && (
           <Alert variant="destructive" className="border-destructive/30 bg-destructive/5">
             <ShieldAlert className="h-4 w-4" />
-            <AlertTitle>Room {expiredCode} has expired</AlertTitle>
+            <AlertTitle>
+              {wasEndedByHost
+                ? `Host ended room ${expiredCode}`
+                : `Room ${expiredCode} has expired`}
+            </AlertTitle>
             <AlertDescription>
-              Its secrets were destroyed and cannot be recovered. Ask the host to
-              start a new room.
+              {wasEndedByHost
+                ? "The host disconnected, so its secrets were destroyed and the room is closed."
+                : "Its secrets were destroyed and cannot be recovered. Ask the host to start a new room."}
             </AlertDescription>
           </Alert>
         )}

@@ -36,7 +36,7 @@ An ephemeral secret-sharing utility: a host opens a temporary room with a six-di
 
 - **Nothing is persisted, by design.** Rooms, secrets and participants live only in the API server's memory and are erased on expiry. There is no database, even though the workspace ships with one. Restarting the API server therefore wipes all active rooms.
 - **SSE, not polling or WebSockets.** A single `GET /api/rooms/:code/events` stream pushes the full room state on every change, so clients never diff partial updates. The stream writes into the TanStack Query cache under the normal query key, so cached data and live data can never disagree.
-- **Presence is derived from open streams,** not from join calls. A participant counts as present while their event stream is open, plus a short grace window so a browser refresh doesn't make them flicker out of the count.
+- **Presence is derived from open streams,** not from join calls. Participants get a short grace window so a browser refresh doesn't make them flicker out of the count. The host is intentionally different: closing its event stream ends the entire room immediately, destroys every secret, and notifies all participants.
 - **Host authority is an unguessable host token** issued once at room creation and required for every secret mutation. There are no accounts, so this token is the only thing separating a host from a participant.
 - **Expiry is enforced in three places:** a per-room timer, a periodic sweep as a safety net, and a check on every room lookup — so an expired room can never be read even if a timer is missed.
 
