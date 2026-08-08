@@ -1,0 +1,76 @@
+## Finalization and GitHub Publishing
+
+Once the application is complete and all tests have passed, complete the following tasks.
+
+### 1. Publish the project to GitHub
+
+- Create a new **public** GitHub repository.
+- Name the repository:
+
+**Ephemeral Secret Sharing**
+
+- Push the complete project with its full Git history.
+- Ensure the repository is publicly accessible.
+
+---
+
+### 2. Deploy the application
+
+Deploy the application and make it publicly accessible.
+
+Requirements:
+
+- The application should be reachable via a simple, shareable public URL.
+- Prefer a short, memorable URL if the deployment platform supports it (for example, something related to "secret" or the project name).
+- Verify that the deployed application is fully functional before considering the task complete.
+
+---
+
+### 3. Configure the GitHub repository
+
+Complete the repository metadata.
+
+Requirements:
+
+- Add a concise repository description explaining what the project does.
+- Add relevant repository topics/tags.
+- Ensure the repository homepage points to the deployed application.
+- Include the live application URL in the appropriate GitHub repository field so visitors can access the application with a single click.
+
+---
+
+### 4. Create a high-quality README
+
+Create a professional README that includes:
+
+- Project title
+- Brief description
+- Problem the project solves
+- Key features
+- How it works
+- User workflow
+- Architecture overview
+- Local setup instructions
+- Running the application
+- Deployment information
+- Project structure
+- Limitations
+- Future improvements
+- License
+
+Include screenshots or GIFs if possible.
+
+---
+
+### 5. Final verification
+
+Before finishing, verify that:
+
+- The GitHub repository is public.
+- The README renders correctly.
+- The repository description is populated.
+- The repository homepage links to the live application.
+- The live application is accessible and functioning.
+- All documentation is accurate and up to date.
+
+Only consider the project complete after all of the above has been successfully verified.
